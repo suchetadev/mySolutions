@@ -43,7 +43,7 @@ If you are using Maven building tool, then in "pom.xml" mention the dependency:
  3) CarService.java - service class 
 
    public class CarService{
-	private CarDao carDao;
+   	private CarDao carDao;
  	
 	public void setCarDao(CarDao carDao) {
 		this.carDao = carDao;
@@ -58,41 +58,43 @@ If you are using Maven building tool, then in "pom.xml" mention the dependency:
    }
 
   4) If we want to test reserveCar() method from CarService.java then "CarServiceTest.java" will be as follows :
+	
+    import org.junit.Before;
+    import org.junit.Test;
+    import org.mockito.InOrder;
+    import static org.mockito.Mockito.*;
 
     public class CarServiceTest{
+    	private CarService carService;
+    	private CarDao carDao;
+    	private Car car;
+    	private int number_of_seats = 3;
 
-       private CarService carService;
-       private CarDao carDao;
-       private Car car;
-       private int number_of_seats = 3;
+    	@Before
+    	public void setUp(){
+           carService = new CarService();
+           car = mock(Car.class);
+           carDao = mock(CarDao.class);
+           carService.setCarDao(carDao);
+    	}
 
-       @Before
-       public void setUp(){
-              carService = new CarService();
-              car = mock(Car.class);
-              carDao = mock(CarDao.class);
-	      carService.setCarDao(carDao);
-       }
-
-       @Test
-       public void testReserveCar() {
-       	   
-	      //stubbing getAvailableSeats() to return 5
-              when(carDao.getAvailableSeats(car)).thenReturn(availableSeats);
-              carService.reserveCar(car, number_of_seats);
+    	@Test
+    	public void testReserveCar() {
+           int availableSeats = 5;
            
-	      //verify CarDao reserveCarSeat() method is called
-              verify(carDao).reserveCarSeat(car, number_of_seats);
+           //stubbing getAvailableSeats() to return 5
+           when(carDao.getAvailableSeats(car)).thenReturn(availableSeats);
+           carService.reserveCar(car, number_of_seats);
+           
+           //verify CarDao reserveCarSeat() method is called
+           verify(carDao).reserveCarSeat(car, number_of_seats);
 
-             //verify getAvailableSeats() is called at least once
-             verify(carDao, atLeastOnce()).getAvailableSeats(car);
+           //verify getAvailableSeats() is called at least once
+           verify(carDao, atLeastOnce()).getAvailableSeats(car);
 
-             //verify order of method calls
-             InOrder order = inOrder(carDao);
-             order.verify(carDao).getAvailableSeats(car);
-             order.verify(carDao).reserveCarSeat(car, number_of_seats);
-      }
-   }
-
-    
- 
+           //verify order of method calls
+           InOrder order = inOrder(carDao);
+           order.verify(carDao).getAvailableSeats(car);
+           order.verify(carDao).reserveCarSeat(car, number_of_seats);
+    	}
+     }
